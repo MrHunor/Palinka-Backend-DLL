@@ -1,0 +1,64 @@
+Hey there! 
+This is the documentation for Palinka, which is the C++ Background Libary
+for UntitledMusicPlayer which you can find at:https://github.com/siryanni/untitled-music-player
+
+
+BE AWARE that not every Version that is cited in this document has a Github Release or commit! 
+The Layout for an Entry is the following:
+VERSION@DD/MM/YY@HH:MM
+NAME_IN_PYTHON|NAME_IN_CPP
+....
+ALL FUNCTIONS THAT FAIL WILL AND HAVE A RETURN VALUE WILL EITHER RETURN A DETAILED ERROR CODE (if the functions redval is a String) OR -1 (if redval is a int/double/float)
+
+V0.1.4@5/09/25@00:37
+InitFmod()| VOID InitFmod()
+Does exatly what it says!
+Needs to be done before calling a another FMOD Function like PlaySound()
+
+PlaySound(string filename)|STRING PlaySound_(string filename)
+Plays a sound from a file which is located at \DirectoryOfExe\Media\.
+Returns an empty String upon sucsess.
+Syntax: print(PlaySound("example.mp3"))
+Currently only texted on small .mp3 files
+
+PauseSound()|VOID PauseSound()
+Pauses the currently playing Sound, if its not already Paused.
+
+ResumeSound()|VOID ResumeSound
+Resumes the Sound if its currently Paused.
+
+EndSound()|VOID EndSound()
+Releases the sound. Should be called before playing another Sound or Ending the Program (if not using Cleanup())
+
+MakeMediaFolder()|VOID MakeMediaFolder()
+Creates a Folder Titled "Media" in the current .exe Directory
+
+Cleanup()|VOID Cleanup()
+Quits FMOD and SQLLite. Should be called before Quitting the Program to avoid Memory leaking.
+
+Add()|INT Add(int number1, int number2)
+A Function that Adds two numbers. Serves the purpose of a test function.
+Returns the Values of the Addition of number1 and number2
+Syntax: print(add(1,2))
+
+ExamplePrint()|VOID ExamplePrint()
+Prints:"Hellow from cpp" to the console. Serves the purpose of a test function.
+
+GetCurrentPosition| INT GetCurrentPosition()
+Returns the Position of the Playback of the current song in seconds.
+
+GetLenght()|INT GetLenght()
+Returns the Lenghts of the currently playing Sound.
+
+DbOpen()|string DbOpen(string name)
+Opens the Database.
+Syntax: print(DbOpen("database.db"))
+
+
+xxxx take this further
+
+
+
+
+
+

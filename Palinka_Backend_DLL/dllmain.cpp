@@ -38,6 +38,7 @@ std::string DbOpen(std::string name)
 
 
 // Function to insert a row into the "songs" table
+xxx this needs to be a retval string function and return an string of errors or "" upon succsess
 bool InsertSong( std::string name, std::string artists, int year) {
     sqlite3_stmt* stmt;
     const char* sql = "INSERT INTO songs (name,artists,year) VALUES (?,?,?)";
@@ -212,32 +213,49 @@ std::string PlaySound_(const std::string& name) {
     }
     return "Unknown error.";
 }
+bool isPaused() {
+    bool paused;
+    if (Channel) {
+        Channel->getPaused(&paused);
+        return paused;
+    }
+	return false; // No channel means nothing is playing, hence not paused
 
+}
 void PauseSound() {
-    if (Channel) Channel->setPaused(true);
+    if (Channel&&!isPaused()) Channel->setPaused(true);
 }
 
 void ResumeSound() {
-    if (Channel) Channel->setPaused(false);
+
+    if (Channel&&isPaused()) Channel->setPaused(false);
 }
 
 void EndSound() {
     if (Sound) Sound->release();
+    
 }
 
 
 int GetCurrentPosition()
 {
+    if (Channel)
+    {
         unsigned int  positionInMs;
         Channel->getPosition(&positionInMs, FMOD_TIMEUNIT_MS);
-		return round(positionInMs / 1000);
-}
+        return round(positionInMs / 1000);
+    }
+    return -1;
+    }
 int GetLength()
 {
-	unsigned int lengthInMs;
-	Sound->getLength(&lengthInMs, FMOD_TIMEUNIT_MS);
-	return round(lengthInMs / 1000);
-
+    if (Channel)
+    {
+        unsigned int lengthInMs;
+        Sound->getLength(&lengthInMs, FMOD_TIMEUNIT_MS);
+        return round(lengthInMs / 1000);
+    }
+    return -1;
 }
 void MakeMediaFolder() {
     system("mkdir Media");
@@ -293,4 +311,5 @@ PYBIND11_MODULE(Palinka, m) {
     m.def("InsertSong", &InsertSong, "Inserts a song into the songs table");
 	m.def("QueryDatabase", &QueryDatabase, "Executes a SQL query and returns the results as a vector of rows&collums (2D vector);IMPORTANT! be carful with this as there may be vecot out of range erros as the function ONLY returns as much colums and rows are needed, e.g SELECT * FROM songs will return the whole table but SELECT name FROM songs will only return one collum, of course if you set extra modifierts like WHERE year = xxxx; then there will be less rows too. ");
 	m.def("FileNameToDBEntry", &FileNameToDBEntry, "Takes a filename as input and returns the corresponding database ID if a match is found, or -1 if no match exists. The function performs a case-insensitive search for both the song name and artist within the filename.");
+	m.def("IsPaused", &isPaused, "Returns true if the currently playing sound is paused, false otherwise");
 }
