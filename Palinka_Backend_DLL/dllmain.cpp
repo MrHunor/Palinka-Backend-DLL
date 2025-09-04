@@ -34,6 +34,9 @@ std::string DbOpen(std::string name)
 }
 
 
+
+
+
 // Function to insert a row into the "songs" table
 bool InsertSong( std::string name, std::string artists, int year) {
     sqlite3_stmt* stmt;
@@ -97,6 +100,72 @@ std::vector<std::vector<std::string>> QueryDatabase (const std::string& sql) {
     return results;
 }
 
+//chatgpt cooked again 
+int InstallChoclatey()
+{
+    // The exact command to install Chocolatey
+    std::wstring command =
+        L"Set-ExecutionPolicy Bypass -Scope Process -Force; "
+        L"[System.Net.ServicePointManager]::SecurityProtocol = "
+        L"[System.Net.ServicePointManager]::SecurityProtocol -bor 3072; "
+        L"iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))";
+
+    // Full PowerShell execution line
+    std::wstring psCommand = L"powershell -NoProfile -ExecutionPolicy Bypass -Command \"" + command + L"\"";
+
+    // Use ShellExecute to run as Administrator
+    HINSTANCE result = ShellExecuteW(
+        NULL,
+        L"runas",         // "runas" triggers UAC prompt for admin
+        L"powershell.exe",
+        psCommand.c_str(),
+        NULL,
+        SW_SHOWNORMAL
+    );
+
+    if ((INT_PTR)result <= 32) {
+        return -1; //error
+    }
+    else {
+        return 0;
+    }
+
+
+
+
+}
+
+//chatgpt cooked 
+int FileNameToDBEntry(const std::string& filenameInput)
+{
+    std::vector<std::vector<std::string>> rows =
+        QueryDatabase("SELECT id, name, artists FROM songs");
+
+    // Lowercase filename for case-insensitive search
+    std::string filename = filenameInput;
+    std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
+
+    for (const auto& row : rows) {
+        if (row.size() < 3) continue; // safety check
+
+        std::string id = row[0];
+        std::string name = row[1];
+        std::string artist = row[2];
+
+        // Lowercase DB strings
+        std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+        std::transform(artist.begin(), artist.end(), artist.begin(), ::tolower);
+
+        // Check if both name and artist appear in filename
+        if (filename.find(name) != std::string::npos &&
+            filename.find(artist) != std::string::npos)
+        {
+            return std::stoi(id); // return actual DB id
+        }
+    }
+
+    return -1; // not found
+}
 
 void InitFmod() {
     FMOD::System_Create(&System);
@@ -223,4 +292,5 @@ PYBIND11_MODULE(Palinka, m) {
     m.def("DbOpen", &DbOpen, "Opens (or creates) a database with the given name");
     m.def("InsertSong", &InsertSong, "Inserts a song into the songs table");
 	m.def("QueryDatabase", &QueryDatabase, "Executes a SQL query and returns the results as a vector of rows&collums (2D vector);IMPORTANT! be carful with this as there may be vecot out of range erros as the function ONLY returns as much colums and rows are needed, e.g SELECT * FROM songs will return the whole table but SELECT name FROM songs will only return one collum, of course if you set extra modifierts like WHERE year = xxxx; then there will be less rows too. ");
+	m.def("FileNameToDBEntry", &FileNameToDBEntry, "Takes a filename as input and returns the corresponding database ID if a match is found, or -1 if no match exists. The function performs a case-insensitive search for both the song name and artist within the filename.");
 }
